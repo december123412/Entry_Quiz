@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>엔트리 코딩 — 야너도 할 수 있어! 🔥</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+:root{--pu:#6C3EE8;--or:#FF7A35;--ye:#FFD700;--pi:#FF4D8D;--gr:#21C878;--sk:#00B4D8;--dk:#1A1A2E;--ca:#252545;--wh:#fff;--gy:#8892A4}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--dk);color:var(--wh);min-height:100vh}
+.page{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem 1rem}
+.page.on{display:flex}
+
+/* 로비 */
+.logo{font-size:3rem;margin-bottom:.3rem;text-align:center}
+.title{font-size:2.2rem;font-weight:900;text-align:center;line-height:1.2;margin-bottom:.3rem}
+.title span{color:var(--ye)}
+.sub{color:var(--gy);font-size:.88rem;text-align:center;margin-bottom:1.8rem}
+.inp{width:100%;max-width:400px;padding:.95rem 1.1rem;border-radius:14px;border:2px solid var(--pu);background:var(--ca);color:var(--wh);font-size:1.1rem;font-family:inherit;outline:none;margin-bottom:.8rem;display:block}
+.inp:focus{border-color:var(--ye)}
+.btn{padding:.85rem 1.5rem;border-radius:12px;border:none;font-size:1rem;font-weight:700;font-family:inherit;cursor:pointer;transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.pu{background:var(--pu);color:#fff;width:100%;max-width:400px;font-size:1.1rem}
+.btn.or{background:var(--or);color:#fff}
+.btn.gr{background:var(--gr);color:var(--dk)}
+.cntbadge{display:inline-flex;align-items:center;gap:.4rem;background:var(--ca);border:1px solid #444;border-radius:50px;padding:.4rem 1rem;font-size:.85rem;color:var(--gy);margin-bottom:1.4rem}
+.cntbadge b{color:var(--gr)}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;max-width:480px;margin-top:.8rem}
+.chip{background:var(--pu);border-radius:50px;padding:.25rem .75rem;font-size:.8rem;font-weight:700}
+.hbadge{background:var(--or);border-radius:50px;padding:.15rem .6rem;font-size:.72rem;font-weight:700;margin-left:.4rem}
+.hostsec{margin-top:1.1rem;padding-top:1.1rem;border-top:1px solid #333;text-align:center}
+
+/* 퀴즈 */
+#pQuiz{background:radial-gradient(ellipse at top,#16093a 0%,var(--dk) 65%);justify-content:flex-start;padding-top:1.2rem}
+.qhdr{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:700px;margin-bottom:1.1rem;flex-wrap:wrap;gap:.5rem}
+.qbadge{background:var(--ye);color:var(--dk);font-weight:900;font-size:1rem;border-radius:50px;padding:.3rem .9rem}
+.qwho{font-size:.85rem;color:var(--gy)}
+.qtimer{font-size:1.05rem;font-weight:700;color:var(--or);background:var(--ca);border-radius:50px;padding:.3rem .85rem;min-width:76px;text-align:center}
+.qtimer.red{color:var(--pi)!important}
+.qcard{background:var(--ca);border-radius:18px;padding:1.3rem 1.1rem;text-align:center;width:100%;max-width:700px;border:2px solid #33336a;font-size:1.15rem;font-weight:700;line-height:1.55;min-height:84px;display:flex;align-items:center;justify-content:center;margin-bottom:1.2rem}
+.optgrid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;width:100%;max-width:700px;margin-bottom:.9rem}
+.optbtn{background:var(--ca);border:2.5px solid #555;color:var(--wh);border-radius:14px;padding:.9rem .75rem;font-size:.98rem;font-weight:700;font-family:inherit;cursor:pointer;text-align:left;line-height:1.4;min-height:60px;word-break:keep-all;transition:background .15s,transform .12s}
+.optbtn:hover:not(:disabled){transform:translateY(-2px)}
+.optbtn:disabled{cursor:default}
+.optbtn.A{border-color:var(--pu)} .optbtn.A:hover:not(:disabled){background:var(--pu)}
+.optbtn.B{border-color:var(--pi)} .optbtn.B:hover:not(:disabled){background:var(--pi)}
+.optbtn.C{border-color:var(--sk)} .optbtn.C:hover:not(:disabled){background:var(--sk)}
+.optbtn.D{border-color:var(--gr)} .optbtn.D:hover:not(:disabled){background:var(--gr)}
+.optbtn.hit{background:var(--gr)!important;border-color:var(--gr)!important;color:var(--dk)!important}
+.optbtn.miss{background:var(--pi)!important;border-color:var(--pi)!important;opacity:.65}
+.fb{text-align:center;font-size:1.35rem;font-weight:900;min-height:2rem;width:100%;max-width:700px}
+.fb.ok{color:var(--gr)} .fb.ng{color:var(--pi)}
+.expl{text-align:center;font-size:.87rem;color:var(--gy);min-height:1.1rem;width:100%;max-width:700px;line-height:1.5;margin-top:.3rem}
+.sstrip{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-top:.8rem}
+.spill{background:#2a2a5a;border-radius:50px;padding:.25rem .75rem;font-size:.78rem;color:var(--ye);font-weight:700}
+.waitbox{text-align:center;color:var(--gy);font-size:1rem;line-height:2;padding:1.5rem}
+
+/* 호스트 패널 */
+#pHost{background:radial-gradient(ellipse at top,#1e1040 0%,var(--dk) 70%);justify-content:flex-start;padding-top:1.3rem}
+.hhdr{text-align:center;margin-bottom:1.1rem}
+.hhdr h1{font-size:1.65rem;font-weight:900}
+.hhdr p{color:var(--gy);font-size:.85rem}
+.hrow{display:flex;justify-content:space-between;font-size:.82rem;color:var(--gy);width:100%;max-width:800px;margin-bottom:.3rem}
+.hbar{height:8px;background:#333;border-radius:50px;overflow:hidden;width:100%;max-width:800px;margin-bottom:.85rem}
+.hfill{height:100%;background:linear-gradient(90deg,var(--pu),var(--pi));border-radius:50px;transition:width .4s}
+.hprev{background:var(--ca);border-radius:14px;padding:.85rem 1.2rem;width:100%;max-width:800px;text-align:center;border:1px solid #444;font-size:.9rem;color:var(--gy);margin-bottom:.9rem}
+.hprev b{color:var(--wh)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(115px,1fr));gap:.6rem;width:100%;max-width:800px;margin-bottom:1.1rem}
+.pcard{background:var(--ca);border-radius:12px;padding:.7rem .45rem;text-align:center;border:2px solid #333;transition:border-color .3s}
+.pcard.done{border-color:var(--gr)}
+.pcard .av{font-size:1.45rem;margin-bottom:.18rem}
+.pcard .nm{font-size:.78rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcard .sc{font-size:.7rem;color:var(--ye);font-weight:700;margin-top:.15rem}
+.hbtns{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center}
+
+/* 결과 */
+#pResult{background:radial-gradient(ellipse at top,#12074a 0%,var(--dk) 60%);justify-content:flex-start;padding-top:1.5rem}
+.rtitle{font-size:1.9rem;font-weight:900;text-align:center;margin-bottom:.2rem}
+.rsub{color:var(--gy);text-align:center;margin-bottom:1.4rem}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:.9rem;margin-bottom:1.6rem;flex-wrap:wrap}
+.pod{text-align:center;background:var(--ca);border-radius:16px;padding:1rem .75rem;min-width:96px;border:2px solid #333}
+.pod.g1{border-color:var(--ye);transform:translateY(-16px);background:linear-gradient(145deg,#2a2060,#3d2a8a)}
+.pod.g2{border-color:#aaa} .pod.g3{border-color:var(--or)}
+.pod .medal{font-size:1.9rem;margin-bottom:.22rem}
+.pod .pn{font-size:.9rem;font-weight:900;word-break:break-all}
+.pod .ps{font-size:.8rem;color:var(--ye);font-weight:700;margin-top:.12rem}
+.pod .pd{font-size:.7rem;color:var(--gy);margin-top:.08rem}
+.divline{width:100%;max-width:660px;height:1px;background:#333;margin:.7rem auto}
+.allwrap{width:100%;max-width:660px}
+.allt{font-size:.95rem;font-weight:700;color:var(--gy);text-align:center;margin-bottom:.6rem}
+.rrow{display:flex;align-items:center;gap:.7rem;background:var(--ca);border-radius:11px;padding:.6rem .85rem;margin-bottom:.4rem;border:1px solid #333}
+.rrk{font-size:.9rem;font-weight:900;min-width:24px;color:var(--gy)}
+.rname{flex:1;font-weight:700;font-size:.88rem}
+.rdots{display:flex;gap:3px}
+.dot{width:19px;height:19px;border-radius:50%;font-size:.62rem;display:flex;align-items:center;justify-content:center;font-weight:900}
+.dot.ok{background:var(--gr);color:var(--dk)} .dot.ng{background:#3a3a6a;color:var(--gy)}
+.rsco{font-size:.86rem;font-weight:900;color:var(--ye);min-width:44px;text-align:right}
+
+#cvs{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999}
+@media(max-width:500px){.optgrid{grid-template-columns:1fr}.title{font-size:1.9rem}.pod{min-width:78px}}
+</style>
+</head>
+<body>
+<canvas id="cvs"></canvas>
+
+<!-- ===== 로비 ===== -->
+<div id="pLobby" class="page on">
+  <div class="logo">🔥</div>
+  <div class="title">엔트리 코딩<br><span>야너도 할 수 있어!</span></div>
+  <div class="sub">초등 6학년 코딩 아이스브레이킹 퀴즈 · 최대 25명 동시 참가</div>
+  <div class="cntbadge">👥 현재 참가자 <b id="lcnt">0</b> / 25명</div>
+  <input id="nickInp" class="inp" maxlength="10" placeholder="닉네임 입력 (최대 10자)" autocomplete="off"/>
+  <button class="btn pu" onclick="doJoin()">🚀 퀴즈 참가하기!</button>
+  <div style="font-size:.76rem;color:var(--gy);margin-top:.8rem;text-align:center;max-width:380px">
+    ※ 같은 브라우저에서 탭을 여러 개 열면 각각 다른 플레이어로 테스트할 수 있어요!<br>
+    <span id="hostHint" style="color:var(--ye);font-weight:700"></span>
+  </div>
+  <div class="chips" id="lchips"></div>
+  <div class="hostsec" id="hostSec" style="display:none">
+    <button class="btn or" onclick="doStart()">🎮 퀴즈 시작하기!</button>
+    <p style="font-size:.76rem;color:var(--gy);margin-top:.45rem">첫 번째로 참가한 나는 HOST예요 <span class="hbadge">HOST</span></p>
+  </div>
+</div>
+
+<!-- ===== 퀴즈 (플레이어) ===== -->
+<div id="pQuiz" class="page">
+  <div class="qhdr">
+    <span class="qbadge" id="qBadge">Q?</span>
+    <span class="qwho" id="qWho"></span>
+    <span class="qtimer" id="qTimer">⏱ 대기</span>
+  </div>
+  <div class="qcard" id="qText">로딩 중...</div>
+  <div class="optgrid" id="optGrid"></div>
+  <div class="fb" id="fb"></div>
+  <div class="expl" id="expl"></div>
+  <div class="sstrip" id="sstrip"></div>
+</div>
+
+<!-- ===== 호스트 패널 ===== -->
+<div id="pHost" class="page">
+  <div class="hhdr">
+    <h1>🎮 퀴즈 진행 중!</h1>
+    <p>참가자 현황 <span class="hbadge">HOST</span></p>
+  </div>
+  <div class="hrow" style="width:100%;max-width:800px">
+    <span>문제 <b id="hQNum" style="color:#fff">1</b> / 6</span>
+    <span>답변: <b id="hAns" style="color:var(--gr)">0</b> / <b id="hTotal">0</b></span>
+  </div>
+  <div class="hbar"><div class="hfill" id="hFill" style="width:0%"></div></div>
+  <div class="hprev" id="hPrev">대기 중...</div>
+  <div class="pgrid" id="pGrid"></div>
+  <div class="hbtns">
+    <button class="btn pu" onclick="doNext()">다음 문제 ▶</button>
+    <button class="btn or" onclick="doResults()">결과 보기 🏆</button>
+  </div>
+</div>
+
+<!-- ===== 결과 ===== -->
+<div id="pResult" class="page">
+  <div class="rtitle">🏆 퀴즈 완료!</div>
+  <div class="rsub">수고했어요, 모두 최고예요! 🎊</div>
+  <div class="podium" id="podium"></div>
+  <div class="divline"></div>
+  <div class="allwrap">
+    <div class="allt">📋 전체 결과</div>
+    <div id="allList"></div>
+  </div>
+  <div style="text-align:center;margin-top:1.4rem;margin-bottom:1rem">
+    <button class="btn pu" onclick="doRestart()">🔄 다시 시작하기</button>
+  </div>
+</div>
+
+<script>
+/* =====================================================
+   퀴즈 데이터
+===================================================== */
+const QS = [
+  {e:"🤔", q:"엔트리(Entry)는 어떤 프로그램일까요?",
+   o:["노래를 만드는 음악 프로그램","블록으로 코딩하는 프로그램","사진을 편집하는 프로그램","수학 문제를 푸는 프로그램"],
+   a:1, x:"엔트리는 블록을 쌓아 게임·애니메이션을 만드는 코딩 플랫폼이에요!"},
+  {e:"🐱", q:"엔트리에서 움직이고 말하는 캐릭터를 뭐라고 부를까요?",
+   o:["블록 (Block)","배경 (Background)","오브젝트 (Object)","코드 (Code)"],
+   a:2, x:"화면에 등장하는 캐릭터·그림을 '오브젝트'라고 해요!"},
+  {e:"🚶", q:"컴퓨터가 명령을 처리하는 가장 기본적인 방식은?",
+   o:["랜덤으로 실행한다","위에서 아래로 순서대로 실행한다","동시에 모두 실행한다","마음대로 골라서 실행한다"],
+   a:1, x:"위에서 아래로 순서대로 실행하는 '순차 구조'가 기본이에요!"},
+  {e:"🔄", q:"같은 동작을 여러 번 반복시키려면 어떤 블록이 필요할까요?",
+   o:["만약 ~이라면 블록","소리 재생하기 블록","10번 반복하기 블록","모양 바꾸기 블록"],
+   a:2, x:"'반복하기' 블록으로 같은 동작을 자동으로 여러 번 실행해요!"},
+  {e:"🎯", q:"'스페이스 키를 누르면 점프한다' — 이것은 어떤 구조일까요?",
+   o:["순차 구조","반복 구조","조건(선택) 구조","저장 구조"],
+   a:2, x:"'만약 ~이라면'처럼 조건에 따라 실행되는 '조건 구조'예요!"},
+  {e:"🤖", q:"엔트리의 마스코트 캐릭터 이름은 무엇일까요?",
+   o:["코딩이","엔트리봇","블록이","네이봇"],
+   a:1, x:"초록 로봇 '엔트리봇'이 엔트리의 마스코트예요!"}
+];
+const LBL = ["①","②","③","④"];
+const AVTS= ["🐱","🐶","🐸","🦊","🐼","🐨","🦁","🐯","🐮","🐷","🐙","🦄","🐲","🦋","🐧","🦉","🐻","🐭","🦅","🐬","🦑","🐳","🦖","🦕","🐠"];
+const SEC = 20;
+
+/* =====================================================
+   플레이어 상태
+===================================================== */
+let myId   = "u" + Date.now() + Math.random().toString(36).slice(2,5);
+let myName = "";
+let myAv   = "";
+let iAmHost= false;
+let curQ   = -1;
+let myAns  = [];   // 각 문제별 결과
+let myScore= 0;
+let timerId= null;
+let picked = false;
+let qOn    = false;
+let tStart = 0;
+let pollT  = null;
+
+/* =====================================================
+   localStorage 헬퍼
+===================================================== */
+const LS = {
+  players(){ return JSON.parse(localStorage.getItem("Q_players")||"[]") },
+  setPlayers(v){ localStorage.setItem("Q_players",JSON.stringify(v)) },
+  state(){ return JSON.parse(localStorage.getItem("Q_state")||'{"ph":"lobby","qi":-1}') },
+  setState(v){ localStorage.setItem("Q_state",JSON.stringify(v)) },
+  results(){ return JSON.parse(localStorage.getItem("Q_res")||"{}") },
+  saveMe(d){ let r=this.results(); r[myId]=d; localStorage.setItem("Q_res",JSON.stringify(r)) }
+};
+
+/* =====================================================
+   BroadcastChannel (다른 탭과 통신)
+===================================================== */
+const BC = new BroadcastChannel("entryquiz_2025");
+BC.onmessage = e => recv(e.data);
+
+function push(msg){
+  // 다른 탭에 전송 (자기 자신은 수신 안됨 — 별도 처리)
+  BC.postMessage(msg);
+}
+
+function recv(msg){
+  if(msg.type==="join")     { drawLobby(); if(iAmHost) drawHostGrid(); }
+  if(msg.type==="go")       { if(!iAmHost){ stopPoll(); enterQuiz(msg.qi); } }
+  if(msg.type==="next")     { if(!iAmHost){ enterQuestion(msg.qi); } }
+  if(msg.type==="answered") { if(iAmHost) drawHostGrid(); }
+  if(msg.type==="finish")   { renderResults(); }
+  if(msg.type==="reset")    { location.reload(); }
+}
+
+/* =====================================================
+   화면 전환
+===================================================== */
+function go(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("on"));
+  document.getElementById(id).classList.add("on");
+}
+
+/* =====================================================
+   로비
+===================================================== */
+function doJoin(){
+  const v = document.getElementById("nickInp").value.trim();
+  if(!v){ alert("닉네임을 입력해 주세요!"); return; }
+  const pl = LS.players();
+  if(pl.length>=25){ alert("최대 25명입니다!"); return; }
+  if(pl.find(p=>p.n===v)){ alert("이미 사용 중인 닉네임이에요!"); return; }
+
+  myName = v;
+  myAv   = AVTS[pl.length % AVTS.length];
+  iAmHost= (pl.length===0);
+
+  if(iAmHost){
+    LS.setState({ph:"lobby",qi:-1});
+    localStorage.removeItem("Q_res");
+  }
+
+  pl.push({id:myId, n:myName, av:myAv});
+  LS.setPlayers(pl);
+  LS.saveMe({id:myId,n:myName,av:myAv,ans:[],score:0});
+
+  push({type:"join"});
+  drawLobby();
+
+  if(iAmHost){
+    document.getElementById("hostHint").textContent="당신이 HOST예요! 모두 참가하면 시작하세요.";
+    document.getElementById("hostSec").style.display="block";
+  } else {
+    // 일반 참가자 → 퀴즈 화면(대기)으로 이동
+    go("pQuiz");
+    document.getElementById("qWho").textContent = myName+" "+myAv;
+    document.getElementById("qBadge").textContent = "대기 중";
+    document.getElementById("qText").textContent  = "🎉 "+myName+"님 환영해요!";
+    document.getElementById("qTimer").textContent = "⏱ 대기";
+    document.getElementById("optGrid").innerHTML  =
+      '<div class="waitbox">HOST가 퀴즈를 시작할 때까지<br>잠깐 기다려 주세요 🕐</div>';
+    document.getElementById("fb").textContent   = "";
+    document.getElementById("expl").textContent = "";
+    refreshStrip();
+    startPoll();
+  }
+}
+
+function drawLobby(){
+  const pl=LS.players();
+  document.getElementById("lcnt").textContent=pl.length;
+  document.getElementById("lchips").innerHTML=pl.map(p=>`<span class="chip">${p.av} ${p.n}</span>`).join("");
+}
+
+function startPoll(){
+  stopPoll();
+  pollT = setInterval(()=>{
+    const st=LS.state();
+    if(st.ph==="question"){ stopPoll(); enterQuiz(st.qi); }
+    else if(st.ph==="results"){ stopPoll(); renderResults(); }
+    else drawLobby();
+  }, 500);
+}
+function stopPoll(){ if(pollT){ clearInterval(pollT); pollT=null; } }
+
+/* =====================================================
+   HOST 시작
+===================================================== */
+function doStart(){
+  LS.setState({ph:"question",qi:0});
+  push({type:"go",qi:0});
+  // HOST 자신은 퀴즈 화면으로 이동
+  go("pQuiz");
+  document.getElementById("qWho").textContent = myName+" "+myAv+" (HOST)";
+  enterQuestion(0);
+  // 백그라운드로 HOST 패널도 갱신
+  drawHostGrid();
+}
+
+function doNext(){
+  const st=LS.state();
+  const nxt=(st.qi||0)+1;
+  if(nxt>=QS.length){ doResults(); return; }
+  LS.setState({ph:"question",qi:nxt});
+  push({type:"next",qi:nxt});
+  // HOST도 퀴즈 화면에서 다음 문제 표시
+  go("pQuiz");
+  document.getElementById("qWho").textContent = myName+" "+myAv+" (HOST)";
+  enterQuestion(nxt);
+}
+
+function doResults(){
+  LS.setState({ph:"results"});
+  push({type:"finish"});
+  renderResults();
+}
+
+function openHostPanel(){
+  go("pHost");
+  drawHostMeta(LS.state().qi||0);
+  drawHostGrid();
+  // HOST가 답변 후 패널 보기
+  if(pollT) stopPoll();
+  pollT = setInterval(()=>{
+    const st=LS.state();
+    if(st.ph==="results"){ stopPoll(); renderResults(); }
+    drawHostGrid();
+  }, 700);
+}
+
+function drawHostMeta(qi){
+  const pl=LS.players();
+  document.getElementById("hQNum").textContent=qi+1;
+  document.getElementById("hTotal").textContent=pl.length;
+  const q=QS[qi];
+  document.getElementById("hPrev").innerHTML=`<b>Q${qi+1}</b>  ${q.e}  ${q.q}`;
+}
+
+function drawHostGrid(){
+  const pl=LS.players(), res=LS.results(), st=LS.state(), qi=st.qi||0;
+  let ansCnt=0;
+  Object.values(res).forEach(r=>{ if(r.ans&&r.ans[qi]!==undefined) ansCnt++; });
+  document.getElementById("hAns").textContent=ansCnt;
+  document.getElementById("hFill").style.width=pl.length?(ansCnt/pl.length*100)+"%":"0%";
+  const g=document.getElementById("pGrid");
+  g.innerHTML="";
+  pl.forEach(p=>{
+    const r=res[p.id];
+    const done=r&&r.ans&&r.ans[qi]!==undefined;
+    const sc=r?r.score||0:0;
+    const d=document.createElement("div");
+    d.className="pcard"+(done?" done":"");
+    d.innerHTML=`<div class="av">${p.av}</div><div class="nm">${p.n}</div><div class="sc">${sc}점 ${done?"✅":"⏳"}</div>`;
+    g.appendChild(d);
+  });
+}
+
+/* =====================================================
+   퀴즈 로직
+===================================================== */
+function enterQuiz(qi){
+  go("pQuiz");
+  document.getElementById("qWho").textContent=myName+" "+myAv;
+  enterQuestion(qi);
+  // 이후 문제 변경 폴링
+  stopPoll();
+  pollT=setInterval(()=>{
+    const st=LS.state();
+    if(st.ph==="results"){ stopPoll(); renderResults(); }
+    else if(st.qi>curQ){ enterQuestion(st.qi); }
+  }, 500);
+}
+
+function enterQuestion(qi){
+  curQ   = qi;
+  picked = false;
+  qOn    = true;
+  tStart = Date.now();
+
+  const q=QS[qi];
+  document.getElementById("qBadge").textContent=`Q${qi+1} / ${QS.length}`;
+  document.getElementById("qText").textContent=q.e+"  "+q.q;
+  document.getElementById("fb").textContent="";
+  document.getElementById("fb").className="fb";
+  document.getElementById("expl").textContent="";
+
+  /* ★★★ 보기 버튼 렌더링 ★★★ */
+  const grid=document.getElementById("optGrid");
+  grid.innerHTML=""; // 기존 내용 비우기
+  const cols=["A","B","C","D"];
+  q.o.forEach(function(text, idx){
+    var btn=document.createElement("button");
+    btn.className="optbtn "+cols[idx];
+    btn.textContent=LBL[idx]+"  "+text;
+    // 클로저 문제 없도록 즉시실행함수로 캡처
+    (function(capturedIdx){
+      btn.addEventListener("click",function(){ doPick(capturedIdx); });
+    })(idx);
+    grid.appendChild(btn);
+  });
+
+  runTimer(qi);
+  refreshStrip();
+
+  // HOST라면 HOST 패널도 백그라운드에서 갱신
+  if(iAmHost) drawHostMeta(qi);
+}
+
+function runTimer(qi){
+  if(timerId) clearInterval(timerId);
+  var t=SEC;
+  var el=document.getElementById("qTimer");
+  el.textContent="⏱ "+t+"초";
+  el.classList.remove("red");
+  timerId=setInterval(function(){
+    t--;
+    el.textContent="⏱ "+t+"초";
+    if(t<=5) el.classList.add("red");
+    if(t<=0){
+      clearInterval(timerId);
+      if(!picked){ picked=true; qOn=false; showAnswer(qi,-1); }
+    }
+  },1000);
+}
+
+function doPick(idx){
+  if(picked||!qOn) return;
+  picked=true; qOn=false;
+  clearInterval(timerId);
+
+  var tms=Date.now()-tStart;
+  var q=QS[curQ];
+  var ok=(idx===q.a);
+  var spd=ok?Math.round(50*Math.max(0,(SEC*1000-tms)/(SEC*1000))):0;
+  var sc=ok?100+spd:0;
+
+  myAns[curQ]={idx:idx,ok:ok,ms:tms,sc:sc};
+  myScore+=sc;
+  LS.saveMe({id:myId,n:myName,av:myAv,ans:myAns,score:myScore});
+  push({type:"answered",id:myId,qi:curQ});
+
+  showAnswer(curQ,idx);
+  refreshStrip();
+  if(iAmHost) drawHostGrid();
+}
+
+function showAnswer(qi,chosen){
+  var q=QS[qi];
+  document.querySelectorAll(".optbtn").forEach(function(b,i){
+    b.disabled=true;
+    if(i===q.a)       b.classList.add("hit");
+    else if(i===chosen) b.classList.add("miss");
+  });
+  var fb=document.getElementById("fb");
+  if(chosen===-1){     fb.textContent="⏰ 시간 초과!"; fb.className="fb ng"; }
+  else if(chosen===q.a){ fb.textContent="🎉 정답이에요!"; fb.className="fb ok"; }
+  else{                fb.textContent="😢 틀렸어요!";  fb.className="fb ng"; }
+  document.getElementById("expl").textContent="✅ "+q.x;
+
+  // HOST라면 버튼 클릭해서 다음 문제로 이동할 수 있도록 안내
+  if(iAmHost){
+    var info=document.createElement("p");
+    info.style.cssText="text-align:center;color:var(--gy);font-size:.8rem;margin-top:.6rem;width:100%;max-width:700px";
+    info.textContent="[HOST] 오른쪽 아래 버튼 또는 아래 버튼으로 다음 문제로 넘어가세요";
+    var existing=document.getElementById("hostNote");
+    if(existing) existing.remove();
+    info.id="hostNote";
+    document.getElementById("pQuiz").appendChild(info);
+
+    // 다음 문제 버튼도 퀴즈 화면에 추가
+    var nb=document.getElementById("hostNextBtn");
+    if(!nb){
+      nb=document.createElement("button");
+      nb.id="hostNextBtn";
+      nb.className="btn or";
+      nb.style.cssText="margin-top:.7rem";
+      nb.addEventListener("click",function(){ 
+        var old=document.getElementById("hostNextBtn");
+        if(old) old.remove();
+        var note=document.getElementById("hostNote");
+        if(note) note.remove();
+        doNext();
+      });
+      document.getElementById("pQuiz").appendChild(nb);
+    }
+    var qi2=LS.state().qi||0;
+    nb.textContent=(qi2>=QS.length-1)?"결과 보기 🏆":"다음 문제 ▶";
+  }
+}
+
+function refreshStrip(){
+  var ok=myAns.filter(function(a){return a&&a.ok}).length;
+  document.getElementById("sstrip").innerHTML=
+    '<div class="spill">🏅 내 점수: '+myScore+'점</div>'+
+    '<div class="spill">✅ 맞힌 문제: '+ok+'개</div>';
+}
+
+/* =====================================================
+   결과 화면
+===================================================== */
+function renderResults(){
+  stopPoll();
+  go("pResult");
+  var all=Object.values(LS.results()).sort(function(a,b){
+    if((b.score||0)!==(a.score||0)) return (b.score||0)-(a.score||0);
+    return avgT(a)-avgT(b);
+  });
+
+  // 시상대
+  var medals=["🥇","🥈","🥉"], gc=["g1","g2","g3"];
+  var pod=document.getElementById("podium");
+  pod.innerHTML="";
+  var order=all.length<2?[0]:all.length===2?[1,0]:[1,0,2];
+  order.forEach(function(ri){
+    var r=all[ri]; if(!r) return;
+    var ok=r.ans?r.ans.filter(function(a){return a&&a.ok}).length:0;
+    var d=document.createElement("div");
+    d.className="pod "+gc[ri];
+    d.innerHTML='<div class="medal">'+medals[ri]+'</div>'+
+      '<div style="font-size:1.6rem">'+r.av+'</div>'+
+      '<div class="pn">'+r.n+'</div>'+
+      '<div class="ps">'+(r.score||0)+'점</div>'+
+      '<div class="pd">'+ok+'문제 정답</div>';
+    pod.appendChild(d);
+  });
+
+  // 전체 목록
+  var list=document.getElementById("allList");
+  list.innerHTML="";
+  all.forEach(function(r,idx){
+    var dots=QS.map(function(_,qi){
+      var a=r.ans&&r.ans[qi];
+      return '<div class="dot '+(a&&a.ok?"ok":"ng")+'">'+(a&&a.ok?"✓":"✗")+'</div>';
+    }).join("");
+    var me=r.id===myId?' <span style="color:var(--ye);font-size:.7rem">(나)</span>':"";
+    var row=document.createElement("div");
+    row.className="rrow";
+    row.innerHTML='<div class="rrk">'+(idx+1)+'</div>'+
+      '<div style="font-size:1.15rem">'+r.av+'</div>'+
+      '<div class="rname">'+r.n+me+'</div>'+
+      '<div class="rdots">'+dots+'</div>'+
+      '<div class="rsco">'+(r.score||0)+'점</div>';
+    list.appendChild(row);
+  });
+
+  setTimeout(fireConfetti,350);
+}
+
+function avgT(r){
+  var t=(r.ans||[]).filter(function(a){return a&&a.ok}).map(function(a){return a.ms});
+  return t.length?t.reduce(function(a,b){return a+b},0)/t.length:99999;
+}
+
+/* =====================================================
+   다시 시작
+===================================================== */
+function doRestart(){
+  localStorage.removeItem("Q_players");
+  localStorage.removeItem("Q_state");
+  localStorage.removeItem("Q_res");
+  push({type:"reset"});
+  location.reload();
+}
+
+/* =====================================================
+   폭죽
+===================================================== */
+function fireConfetti(){
+  var cv=document.getElementById("cvs"),cx=cv.getContext("2d");
+  cv.width=window.innerWidth; cv.height=window.innerHeight;
+  var COLS=["#6C3EE8","#FF7A35","#FFD700","#FF4D8D","#21C878","#00B4D8","#fff","#ff6b6b"];
+  var ps=[];
+  function mk(x,y,burst){
+    var ang=burst?Math.random()*Math.PI*2:0,sp=burst?3+Math.random()*8:0;
+    return{x,y,vx:burst?Math.cos(ang)*sp:(Math.random()-.5)*4,vy:burst?Math.sin(ang)*sp-2:1.5+Math.random()*4,
+      col:COLS[Math.floor(Math.random()*COLS.length)],
+      rot:Math.random()*Math.PI*2,rv:(Math.random()-.5)*.18,
+      shape:Math.random()>.45?"r":"c",w:7+Math.random()*10,h:4+Math.random()*6,a:1};
+  }
+  for(var i=0;i<160;i++) ps.push(mk(Math.random()*cv.width,-10-Math.random()*220,false));
+  [[cv.width*.25,cv.height*.3],[cv.width*.75,cv.height*.3],[cv.width*.5,cv.height*.15]].forEach(function(b){
+    for(var i=0;i<70;i++) ps.push(mk(b[0],b[1],true));
+  });
+  var fr=0;
+  function draw(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    var alive=false;
+    ps.forEach(function(p){
+      p.x+=p.vx; p.y+=p.vy; p.vy+=.09; p.rot+=p.rv; p.a-=.005;
+      if(p.a>0&&p.y<cv.height+30){
+        alive=true; cx.save(); cx.globalAlpha=Math.max(0,p.a);
+        cx.translate(p.x,p.y); cx.rotate(p.rot); cx.fillStyle=p.col;
+        if(p.shape==="c"){cx.beginPath();cx.arc(0,0,p.w/2,0,Math.PI*2);cx.fill();}
+        else cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+        cx.restore();
+      }
+    });
+    fr++;
+    if(alive||fr<80) requestAnimationFrame(draw);
+    else cx.clearRect(0,0,cv.width,cv.height);
+  }
+  draw();
+  setTimeout(function(){
+    for(var i=0;i<120;i++) ps.push(mk(Math.random()*cv.width,-15,false));
+    [[cv.width*.15,cv.height*.4],[cv.width*.85,cv.height*.4]].forEach(function(b){
+      for(var i=0;i<60;i++) ps.push(mk(b[0],b[1],true));
+    });
+  },900);
+}
+
+/* =====================================================
+   엔터키
+===================================================== */
+document.getElementById("nickInp").addEventListener("keydown",function(e){
+  if(e.key==="Enter") doJoin();
+});
+
+// 로비 자동 갱신
+setInterval(function(){
+  if(document.getElementById("pLobby").classList.contains("on")) drawLobby();
+  if(iAmHost&&document.getElementById("pHost").classList.contains("on")) drawHostGrid();
+},1000);
+</script>
+</body>
+</html>
