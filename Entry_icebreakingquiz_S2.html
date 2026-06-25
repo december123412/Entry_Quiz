@@ -98,6 +98,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--dk);color:var(--wh);
 .rsco{font-size:.86rem;font-weight:900;color:var(--ye);min-width:44px;text-align:right}
 
 #cvs{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999}
+.recover-box{margin-top:1.2rem;padding:1rem 1.2rem;background:#1e1240;border:2px solid var(--or);border-radius:16px;text-align:center;max-width:400px;width:100%}
+.recover-box p{font-size:.82rem;color:var(--gy);margin-bottom:.7rem;line-height:1.6}
+.recover-box strong{color:var(--or)}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--or);color:#fff;font-weight:700;font-size:.9rem;padding:.7rem 1.4rem;border-radius:50px;z-index:9998;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
 @media(max-width:500px){.optgrid{grid-template-columns:1fr}.title{font-size:1.9rem}.pod{min-width:78px}}
 </style>
 </head>
@@ -121,7 +126,12 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--dk);color:var(--wh);
     <button class="btn or" onclick="doStart()">🎮 퀴즈 시작하기!</button>
     <p style="font-size:.76rem;color:var(--gy);margin-top:.45rem">첫 번째로 참가한 나는 HOST예요 <span class="hbadge">HOST</span></p>
   </div>
+  <div class="recover-box" id="recoverBox" style="display:none">
+    <p>⚠️ <strong>HOST 없이 게임이 진행 중</strong>이에요!<br>닉네임을 입력하고 HOST 권한을 이어받을 수 있어요.</p>
+    <button class="btn or" onclick="doTakeHost()" style="width:100%">👑 HOST 권한 가져오기</button>
+  </div>
 </div>
+<div class="toast" id="toast"></div>
 
 <!-- ===== 퀴즈 (플레이어) ===== -->
 <div id="pQuiz" class="page">
@@ -221,10 +231,14 @@ let pollT  = null;
 const LS = {
   players(){ return JSON.parse(localStorage.getItem("Q_players")||"[]") },
   setPlayers(v){ localStorage.setItem("Q_players",JSON.stringify(v)) },
-  state(){ return JSON.parse(localStorage.getItem("Q_state")||'{"ph":"lobby","qi":-1}') },
+  state(){ return JSON.parse(localStorage.getItem("Q_state")||'{"ph":"lobby","qi":-1,"hostId":""}') },
   setState(v){ localStorage.setItem("Q_state",JSON.stringify(v)) },
   results(){ return JSON.parse(localStorage.getItem("Q_res")||"{}") },
-  saveMe(d){ let r=this.results(); r[myId]=d; localStorage.setItem("Q_res",JSON.stringify(r)) }
+  saveMe(d){ let r=this.results(); r[myId]=d; localStorage.setItem("Q_res",JSON.stringify(r)) },
+  hostId(){ return this.state().hostId||"" },
+  setHostId(id){ const st=this.state(); st.hostId=id; this.setState(st); },
+  hostAlive(){ return JSON.parse(localStorage.getItem("Q_heartbeat")||"0") > Date.now()-3000 },
+  ping(){ localStorage.setItem("Q_heartbeat", Date.now()) }
 };
 
 /* =====================================================
@@ -239,12 +253,13 @@ function push(msg){
 }
 
 function recv(msg){
-  if(msg.type==="join")     { drawLobby(); if(iAmHost) drawHostGrid(); }
-  if(msg.type==="go")       { if(!iAmHost){ stopPoll(); enterQuiz(msg.qi); } }
-  if(msg.type==="next")     { if(!iAmHost){ enterQuestion(msg.qi); } }
-  if(msg.type==="answered") { if(iAmHost) drawHostGrid(); }
-  if(msg.type==="finish")   { renderResults(); }
-  if(msg.type==="reset")    { location.reload(); }
+  if(msg.type==="join")        { drawLobby(); if(iAmHost) drawHostGrid(); checkRecoverBox(); }
+  if(msg.type==="go")          { if(!iAmHost){ stopPoll(); enterQuiz(msg.qi); } }
+  if(msg.type==="next")        { if(!iAmHost){ enterQuestion(msg.qi); } }
+  if(msg.type==="answered")    { if(iAmHost) drawHostGrid(); }
+  if(msg.type==="finish")      { renderResults(); }
+  if(msg.type==="host_change") { showToast("👑 "+msg.name+"님이 HOST 권한을 가져갔어요!"); }
+  if(msg.type==="reset")       { location.reload(); }
 }
 
 /* =====================================================
@@ -270,7 +285,7 @@ function doJoin(){
   iAmHost= (pl.length===0);
 
   if(iAmHost){
-    LS.setState({ph:"lobby",qi:-1});
+    LS.setState({ph:"lobby",qi:-1,hostId:myId});
     localStorage.removeItem("Q_res");
   }
 
@@ -280,6 +295,7 @@ function doJoin(){
 
   push({type:"join"});
   drawLobby();
+  checkRecoverBox();
 
   if(iAmHost){
     document.getElementById("hostHint").textContent="당신이 HOST예요! 모두 참가하면 시작하세요.";
@@ -321,7 +337,7 @@ function stopPoll(){ if(pollT){ clearInterval(pollT); pollT=null; } }
    HOST 시작
 ===================================================== */
 function doStart(){
-  LS.setState({ph:"question",qi:0});
+  LS.setState({ph:"question",qi:0,hostId:myId});
   push({type:"go",qi:0});
   // HOST 자신은 퀴즈 화면으로 이동
   go("pQuiz");
@@ -335,7 +351,7 @@ function doNext(){
   const st=LS.state();
   const nxt=(st.qi||0)+1;
   if(nxt>=QS.length){ doResults(); return; }
-  LS.setState({ph:"question",qi:nxt});
+  LS.setState({ph:"question",qi:nxt,hostId:myId});
   push({type:"next",qi:nxt});
   // HOST도 퀴즈 화면에서 다음 문제 표시
   go("pQuiz");
@@ -643,17 +659,141 @@ function fireConfetti(){
 }
 
 /* =====================================================
+   HOST 복구 — 자동 감지 & 수동 인수
+===================================================== */
+// 하트비트: HOST가 살아있으면 3초마다 ping
+setInterval(function(){
+  if(iAmHost) LS.ping();
+},2000);
+
+function checkRecoverBox(){
+  // 게임이 진행 중인데 HOST가 없는 경우에만 복구 버튼 표시
+  const st=LS.state();
+  const hasGame = LS.players().length > 0;
+  const gameOn  = st.ph==="question" || st.ph==="lobby";
+  const hostGone= hasGame && !LS.hostAlive();
+  const notJoined = !myName; // 아직 닉네임 미입력
+  document.getElementById("recoverBox").style.display =
+    (hasGame && hostGone && notJoined) ? "block" : "none";
+}
+
+// 자동 HOST 승계: HOST 하트비트가 끊기면 참가자 중 가장 먼저 들어온 사람이 자동으로 HOST
+setInterval(function(){
+  if(iAmHost) return; // 이미 HOST면 패스
+  if(!myName) return; // 아직 참가 안 했으면 패스
+  const st=LS.state();
+  if(st.ph==="results") return; // 게임 끝났으면 패스
+  if(LS.hostAlive()) return;    // HOST 살아있으면 패스
+  // 내가 players 중 첫 번째인지 확인
+  const pl=LS.players();
+  if(pl.length>0 && pl[0].id===myId){
+    // 자동 HOST 승계
+    iAmHost=true;
+    LS.setHostId(myId);
+    LS.ping();
+    push({type:"host_change",name:myName});
+    showToast("👑 HOST 권한을 자동으로 이어받았어요!");
+    // 현재 진행 상황에 맞게 화면 전환
+    if(st.ph==="question"){
+      var nb=document.getElementById("hostNextBtn");
+      if(!nb){
+        nb=document.createElement("button");
+        nb.id="hostNextBtn";
+        nb.className="btn or";
+        nb.style.cssText="margin-top:.7rem";
+        nb.addEventListener("click",function(){
+          var old=document.getElementById("hostNextBtn");
+          if(old) old.remove();
+          var note=document.getElementById("hostNote");
+          if(note) note.remove();
+          doNext();
+        });
+        document.getElementById("pQuiz").appendChild(nb);
+        nb.textContent=(st.qi>=QS.length-1)?"결과 보기 🏆":"다음 문제 ▶";
+      }
+    }
+  }
+},3500);
+
+function doTakeHost(){
+  const v=document.getElementById("nickInp").value.trim();
+  if(!v){ alert("먼저 닉네임을 입력해 주세요!"); return; }
+  const pl=LS.players();
+  if(pl.find(p=>p.n===v)){ alert("이미 사용 중인 닉네임이에요!"); return; }
+
+  myName=v;
+  myAv=AVTS[pl.length%AVTS.length];
+  iAmHost=true;
+
+  pl.push({id:myId,n:myName,av:myAv});
+  LS.setPlayers(pl);
+  LS.saveMe({id:myId,n:myName,av:myAv,ans:[],score:myScore});
+  LS.setHostId(myId);
+  LS.ping();
+
+  push({type:"host_change",name:myName});
+  push({type:"join"});
+  drawLobby();
+  document.getElementById("recoverBox").style.display="none";
+  document.getElementById("hostSec").style.display="none";
+
+  // 현재 게임 상태에 맞게 복귀
+  const st=LS.state();
+  if(st.ph==="question"){
+    showToast("👑 HOST 권한을 가져왔어요! 현재 Q"+(st.qi+1)+"에서 재개합니다.");
+    // HOST는 퀴즈 화면으로 진입 (이미 답변 완료된 문제라도 다음 문제 버튼 제공)
+    go("pQuiz");
+    document.getElementById("qWho").textContent=myName+" "+myAv+" (HOST)";
+    document.getElementById("qBadge").textContent="Q"+(st.qi+1)+" / "+QS.length;
+    document.getElementById("qText").textContent=QS[st.qi].e+"  "+QS[st.qi].q;
+    document.getElementById("optGrid").innerHTML="";
+    document.getElementById("fb").textContent="";
+    document.getElementById("expl").textContent="이미 진행 중인 문제예요. 참가자들이 답변 후 다음 문제로 넘어가세요.";
+    document.getElementById("qTimer").textContent="HOST";
+
+    var nb=document.createElement("button");
+    nb.id="hostNextBtn";
+    nb.className="btn or";
+    nb.style.cssText="margin-top:.7rem";
+    nb.addEventListener("click",function(){
+      var old=document.getElementById("hostNextBtn");
+      if(old) old.remove();
+      doNext();
+    });
+    nb.textContent=(st.qi>=QS.length-1)?"결과 보기 🏆":"다음 문제 ▶";
+    document.getElementById("pQuiz").appendChild(nb);
+  } else if(st.ph==="lobby"){
+    document.getElementById("hostHint").textContent="HOST 권한을 이어받았어요! 시작하세요.";
+    document.getElementById("hostSec").style.display="block";
+    showToast("👑 HOST 권한을 가져왔어요!");
+  }
+}
+
+function showToast(msg){
+  var t=document.getElementById("toast");
+  t.textContent=msg;
+  t.classList.add("show");
+  setTimeout(function(){ t.classList.remove("show"); },3000);
+}
+
+/* =====================================================
    엔터키
 ===================================================== */
 document.getElementById("nickInp").addEventListener("keydown",function(e){
   if(e.key==="Enter") doJoin();
 });
 
-// 로비 자동 갱신
+// 로비 자동 갱신 + HOST 복구 버튼 감지
 setInterval(function(){
-  if(document.getElementById("pLobby").classList.contains("on")) drawLobby();
+  if(document.getElementById("pLobby").classList.contains("on")){
+    drawLobby();
+    if(!myName) checkRecoverBox();
+  }
   if(iAmHost&&document.getElementById("pHost").classList.contains("on")) drawHostGrid();
-},1000);
+},1200);
+
+// 페이지 로드 시 복구 버튼 확인
+setTimeout(checkRecoverBox, 800);
 </script>
 </body>
 </html>
